@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final v29 (Original GitHub Version + Trace Pad + Tap Fix)
+ * THE PIGEON - Final v36 (Invisible Pixel Trick + DOM Eraser)
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -84,6 +84,37 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("scaleSelectContainer").style.display = harmonizeCheckbox.checked ? "inline" : "none";
   });
 
+  // ==========================================
+  // --- UI & CURSOR LOGIC (BRUTE FORCE FIX) ---
+  // ==========================================
+  const customEraser = document.getElementById("custom-eraser");
+  
+  // Wir erstellen dynamisch einen <style>-Tag, der den Browser zwingt, zu gehorchen
+  const cursorBlocker = document.createElement("style");
+  document.head.appendChild(cursorBlocker);
+
+  toolSelect.addEventListener("change", (e) => {
+    const isErase = e.target.value === "erase";
+    if (isErase) {
+      // Schreibt knallhart "kein Cursor für ALLES" in die Seite
+      cursorBlocker.innerHTML = `* { cursor: none !important; }`;
+      customEraser.style.display = "block";
+    } else {
+      // Löscht den Befehl wieder, normales Fadenkreuz kommt zurück
+      cursorBlocker.innerHTML = ``;
+      customEraser.style.display = "none";
+    }
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    // Bewegt unser PNG exakt an die Mauskoordinaten
+    if (toolSelect.value === "erase" && customEraser) {
+      customEraser.style.left = e.clientX + "px";
+      customEraser.style.top = e.clientY + "px";
+    }
+  });
+  // ==========================================
+
   // --- INTERACTION MAIN CANVAS ---
   tracks.forEach(track => {
     drawGrid(track);
@@ -116,7 +147,6 @@ document.addEventListener("DOMContentLoaded", function() {
     };
     const stopDraw = () => { 
       if(drawing) { 
-        // FIX FÜR "KURZ TAPPEN": Erzeugt einen sichtbaren & hörbaren Punkt
         if(curSeg && curSeg.points.length === 1) {
           curSeg.points.push({x: curSeg.points[0].x + 0.5, y: curSeg.points[0].y, jX: curSeg.points[0].jX, jY: curSeg.points[0].jY});
         }
@@ -235,11 +265,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const x = (elapsed/playbackDuration) * 750; 
     tracks.forEach(t => redrawTrack(t, x)); 
     updateViz(x);
-    
-    // UPDATE CURSOR IN TRACE PAD
-    const tc = document.getElementById("trace-cursor");
-    if (tc) tc.style.left = x + "px";
-
     animationFrameId = requestAnimationFrame(loop);
   }
 
@@ -298,7 +323,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if(hx!==undefined){ t.ctx.save(); t.ctx.beginPath(); t.ctx.strokeStyle="red"; t.ctx.lineWidth=2; t.ctx.moveTo(hx,0); t.ctx.lineTo(hx,100); t.ctx.stroke(); t.ctx.restore(); }
   }
 
-  // --- UI ---
   document.getElementById("playButton").addEventListener("click", () => { if(isPlaying) return; initAudio(); if(audioCtx.state==="suspended")audioCtx.resume(); playbackDuration=(60/(parseFloat(document.getElementById("bpmInput").value)||120))*32; playbackStartTime=audioCtx.currentTime+0.1; isPlaying=true; scheduleTracks(playbackStartTime); loop(); });
   document.getElementById("stopButton").addEventListener("click", () => { isPlaying = false; cancelAnimationFrame(animationFrameId); activeNodes.forEach(node => { try { node.stop(); node.disconnect(); } catch (e) {} }); activeNodes = []; tracks.forEach(t => { if(t.gainNode) t.gainNode.disconnect(); redrawTrack(t); }); if(pigeonImg) { pigeonImg.style.transform = "scale(1)"; pigeonImg.style.filter = ""; } document.querySelectorAll(".pad").forEach(p => p.classList.remove("queued")); });
   document.getElementById("clearButton").addEventListener("click", () => { tracks.forEach(t=>{t.segments=[]; redrawTrack(t);}); });
@@ -346,7 +370,6 @@ document.addEventListener("DOMContentLoaded", function() {
       const r = tracePad.getBoundingClientRect();
       const cx = e.touches ? e.touches[0].clientX : e.clientX;
       const cy = e.touches ? e.touches[0].clientY : e.clientY;
-      // Mappt die Y-Achse sauber auf die Canvas-Höhe von 100
       return { x: (cx - r.left) * (750 / r.width), y: (cy - r.top) * (100 / r.height) }; 
     };
 
@@ -395,7 +418,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const stopTrace = () => {
       if (isTracing) {
-        // FIX FÜR "KURZ TAPPEN" AUF DEM PAD
         if(traceCurrentSeg && traceCurrentSeg.points.length === 1) {
             let p = traceCurrentSeg.points[0];
             traceCurrentSeg.points.push({x: p.x + 0.5, y: p.y, jX: p.jX, jY: p.jY});
