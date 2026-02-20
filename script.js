@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final v38 (Clean Eraser Toggle)
+ * THE PIGEON - Final v39 (Fixed .cur Coordinate Bug!)
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -87,13 +87,21 @@ document.addEventListener("DOMContentLoaded", function() {
   // ==========================================
   // --- UI & CURSOR LOGIC ---
   // ==========================================
-  toolSelect.addEventListener("change", (e) => {
-    if (e.target.value === "erase") {
-      document.body.classList.add("eraser-mode");
-    } else {
-      document.body.classList.remove("eraser-mode");
-    }
-  });
+  function updateCursor() {
+    const isErase = toolSelect.value === "erase";
+    // WICHTIG: Keine "0 0" Koordinaten bei .cur Dateien! Browser lehnen das als invalid ab!
+    const cursorValue = isErase ? "url('cursor.cur'), crosshair" : "crosshair";
+    
+    // Wir setzen den Cursor gnadenlos inline auf alles Wichtige
+    document.body.style.cursor = isErase ? "url('cursor.cur'), auto" : "auto";
+    tracks.forEach(t => t.canvas.style.cursor = cursorValue);
+    const tracePad = document.getElementById("trace-pad");
+    if (tracePad) tracePad.style.cursor = cursorValue;
+  }
+
+  toolSelect.addEventListener("change", updateCursor);
+  // Führen wir beim Start einmal aus, damit der Standard (Crosshair) gesetzt wird
+  updateCursor(); 
   // ==========================================
 
   // --- INTERACTION MAIN CANVAS ---
