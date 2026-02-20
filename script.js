@@ -256,15 +256,23 @@ document.addEventListener("DOMContentLoaded", function() {
   const tracePad = document.getElementById("trace-pad");
 
   function loop() {
-    if(!isPlaying) return; const elapsed = audioCtx.currentTime - playbackStartTime;
+    if(!isPlaying) return; 
+    
+    // WICHTIG: Hier nutzen wir jetzt 'let' statt 'const', damit wir die Zeit beim Neustart sofort auf 0 setzen können
+    let elapsed = audioCtx.currentTime - playbackStartTime;
+    
     if(elapsed >= playbackDuration) { 
       activeNodes = activeNodes.filter(n => n.playbackState !== 'finished'); 
       if (queuedPattern) { loadPatternData(queuedPattern.data); document.querySelectorAll(".pad").forEach(p=>p.classList.remove("active", "queued")); queuedPattern.pad.classList.add("active"); queuedPattern = null; } 
+      
       if(document.getElementById("loopCheckbox").checked) { 
           playbackStartTime = audioCtx.currentTime; 
           scheduleTracks(playbackStartTime); 
           
-          // Wenn man am Loop-Ende noch gedrückt hält, muss der Strich nahtlos von vorn anfangen!
+          // DER FIX: Die abgelaufene Zeit wird für diesen einen Frame hart auf 0 gezwungen
+          elapsed = 0; 
+          
+          // Wenn man am Loop-Ende noch gedrückt hält, kappen wir die Leitung und starten nahtlos einen neuen Strich
           if (isTracing && traceCurrentSeg) {
               undoStack.push({trackIdx: currentTargetTrack, segment: traceCurrentSeg});
               traceCurrentSeg = { points: [], brush: brushSelect.value, thickness: parseInt(sizeSlider.value), chordType: chordSelect.value };
@@ -273,12 +281,20 @@ document.addEventListener("DOMContentLoaded", function() {
       } 
       else { isPlaying=false; return; } 
     }
+    
     const x = (elapsed/playbackDuration) * 750; 
     
-    // Das Pad zeichnet sich automatisch selbst in Echtzeit!
+    // Das Pad zeichnet sich automatisch selbst in Echtzeit
     if (isTracing && traceCurrentSeg) {
         let jX = 0, jY = 0;
         if (brushSelect.value === "fractal") { jX = Math.random() * 20 - 10; jY = Math.random() * 40 - 20; }
+        
+        // ABSOLUTER SICHERHEITS-CHECK: Falls die Maus doch mal einen Sprung nach links macht, kappen wir die Linie!
+        if (traceCurrentSeg.points.length > 0 && x < traceCurrentSeg.points[traceCurrentSeg.points.length - 1].x - 20) {
+            traceCurrentSeg = { points: [], brush: brushSelect.value, thickness: parseInt(sizeSlider.value), chordType: chordSelect.value };
+            tracks[currentTargetTrack].segments.push(traceCurrentSeg);
+        }
+
         traceCurrentSeg.points.push({x: x, y: traceCurrentY, jX, jY});
     }
 
