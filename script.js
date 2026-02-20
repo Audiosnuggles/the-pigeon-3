@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final v46 (DOM Eraser + Native Crosshair Peace Treaty)
+ * THE PIGEON - Final Trace-Pad Precision Update
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -24,8 +24,6 @@ function drawSegmentParticles(ctx, pts, idx1, idx2, size) { ctx.fillStyle = "rgb
 function drawSegmentFractal(ctx, pts, idx1, idx2, size) { ctx.lineWidth = size; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(pts[idx1].x + (pts[idx1].jX||0), pts[idx1].y + (pts[idx1].jY||0)); ctx.lineTo(pts[idx2].x + (pts[idx2].jX||0), pts[idx2].y + (pts[idx2].jY||0)); ctx.stroke(); }
 
 document.addEventListener("DOMContentLoaded", function() {
-  
-  console.log("🕊️ PIGEON V46: DOM Eraser + System Crosshair");
   
   let audioCtx, masterGain, analyser, isPlaying=false;
   let playbackStartTime=0, playbackDuration=0, animationFrameId;
@@ -87,7 +85,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("scaleSelectContainer").style.display = harmonizeCheckbox.checked ? "inline" : "none";
   });
 
-
   // ==========================================
   // --- DOM ERASER LOGIC ---
   // ==========================================
@@ -104,15 +101,11 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   window.addEventListener("mousemove", (e) => {
-    // Bewegt das HTML Element immer mit der Maus mit.
-    // Da es ein DOM Element ist, zuckt oder verschwindet es beim Wischen nicht!
     if (isEraserMode && customEraser) {
       customEraser.style.left = e.clientX + "px";
       customEraser.style.top = e.clientY + "px";
     }
   });
-  // ==========================================
-
 
   // --- INTERACTION MAIN CANVAS ---
   tracks.forEach(track => {
@@ -253,15 +246,42 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
+  // ==========================================
+  // --- TRACE PAD / XY PAD PRECISION LOGIC ---
+  // ==========================================
+  let isTracing = false;
+  let traceCurrentSeg = null;
+  let currentTargetTrack = 0;
+  let traceCurrentY = 50; // Merkt sich die Y-Höhe für das Dauerfeuer
+  const tracePad = document.getElementById("trace-pad");
+
   function loop() {
     if(!isPlaying) return; const elapsed = audioCtx.currentTime - playbackStartTime;
     if(elapsed >= playbackDuration) { 
       activeNodes = activeNodes.filter(n => n.playbackState !== 'finished'); 
       if (queuedPattern) { loadPatternData(queuedPattern.data); document.querySelectorAll(".pad").forEach(p=>p.classList.remove("active", "queued")); queuedPattern.pad.classList.add("active"); queuedPattern = null; } 
-      if(document.getElementById("loopCheckbox").checked) { playbackStartTime = audioCtx.currentTime; scheduleTracks(playbackStartTime); } 
+      if(document.getElementById("loopCheckbox").checked) { 
+          playbackStartTime = audioCtx.currentTime; 
+          scheduleTracks(playbackStartTime); 
+          
+          // Wenn man am Loop-Ende noch gedrückt hält, muss der Strich nahtlos von vorn anfangen!
+          if (isTracing && traceCurrentSeg) {
+              undoStack.push({trackIdx: currentTargetTrack, segment: traceCurrentSeg});
+              traceCurrentSeg = { points: [], brush: brushSelect.value, thickness: parseInt(sizeSlider.value), chordType: chordSelect.value };
+              tracks[currentTargetTrack].segments.push(traceCurrentSeg);
+          }
+      } 
       else { isPlaying=false; return; } 
     }
     const x = (elapsed/playbackDuration) * 750; 
+    
+    // Das Pad zeichnet sich automatisch selbst in Echtzeit!
+    if (isTracing && traceCurrentSeg) {
+        let jX = 0, jY = 0;
+        if (brushSelect.value === "fractal") { jX = Math.random() * 20 - 10; jY = Math.random() * 40 - 20; }
+        traceCurrentSeg.points.push({x: x, y: traceCurrentY, jX, jY});
+    }
+
     tracks.forEach(t => redrawTrack(t, x)); 
     updateViz(x);
     animationFrameId = requestAnimationFrame(loop);
@@ -356,14 +376,6 @@ document.addEventListener("DOMContentLoaded", function() {
     return new Blob([arr],{type:"audio/wav"});
   }
 
-  // ==========================================
-  // --- TRACE PAD PERFORMANCE LOGIC ---
-  // ==========================================
-  let isTracing = false;
-  let traceCurrentSeg = null;
-  let currentTargetTrack = 0;
-  const tracePad = document.getElementById("trace-pad");
-
   if (tracePad) {
     const getPadPos = (e) => {
       const r = tracePad.getBoundingClientRect();
@@ -380,49 +392,43 @@ document.addEventListener("DOMContentLoaded", function() {
       
       isTracing = true;
       const pos = getPadPos(e);
+      traceCurrentY = pos.y; // Position sofort merken
+      
       const elapsed = audioCtx.currentTime - playbackStartTime;
       const currentX = (elapsed / playbackDuration) * 750;
       
-      let jX = 0, jY = 0;
-      if (brushSelect.value === "fractal") { jX = Math.random() * 20 - 10; jY = Math.random() * 40 - 20; }
-      
       traceCurrentSeg = { 
-          points: [{x: currentX, y: pos.y, jX, jY}], 
+          points: [{x: currentX, y: traceCurrentY, jX: 0, jY: 0}], 
           brush: brushSelect.value, 
           thickness: parseInt(sizeSlider.value), 
           chordType: chordSelect.value 
       };
       tracks[currentTargetTrack].segments.push(traceCurrentSeg);
       
-      if (brushSelect.value === "particles") triggerParticleGrain(tracks[currentTargetTrack], pos.y);
-      else startLiveSynth(tracks[currentTargetTrack], pos.y);
+      if (brushSelect.value === "particles") triggerParticleGrain(tracks[currentTargetTrack], traceCurrentY);
+      else startLiveSynth(tracks[currentTargetTrack], traceCurrentY);
     };
 
     const moveTrace = (e) => {
       if (!isTracing || !isPlaying) return;
       e.preventDefault();
       const pos = getPadPos(e);
-      const elapsed = audioCtx.currentTime - playbackStartTime;
-      const currentX = (elapsed / playbackDuration) * 750;
+      traceCurrentY = pos.y; // Nur Y updaten, das Zeichnen macht der Loop!
       
-      let jX = 0, jY = 0;
-      if (brushSelect.value === "fractal") { jX = Math.random() * 20 - 10; jY = Math.random() * 40 - 20; }
-      
-      traceCurrentSeg.points.push({x: currentX, y: pos.y, jX, jY});
-      redrawTrack(tracks[currentTargetTrack]); 
-      
-      if (brushSelect.value === "particles") triggerParticleGrain(tracks[currentTargetTrack], pos.y);
-      else updateLiveSynth(tracks[currentTargetTrack], pos.y + jY);
+      if (brushSelect.value === "particles") triggerParticleGrain(tracks[currentTargetTrack], traceCurrentY);
+      else updateLiveSynth(tracks[currentTargetTrack], traceCurrentY); 
     };
 
     const stopTrace = () => {
       if (isTracing) {
-        if(traceCurrentSeg && traceCurrentSeg.points.length === 1) {
-            let p = traceCurrentSeg.points[0];
-            traceCurrentSeg.points.push({x: p.x + 0.5, y: p.y, jX: p.jX, jY: p.jY});
+        const elapsed = audioCtx.currentTime - playbackStartTime;
+        const currentX = (elapsed / playbackDuration) * 750;
+        if(traceCurrentSeg) {
+            // Letzten Punkt exakt am Ende stempeln
+            traceCurrentSeg.points.push({x: currentX, y: traceCurrentY, jX: 0, jY: 0});
+            undoStack.push({trackIdx: currentTargetTrack, segment: traceCurrentSeg});
         }
         redrawTrack(tracks[currentTargetTrack]);
-        undoStack.push({trackIdx: currentTargetTrack, segment: traceCurrentSeg});
         stopLiveSynth();
         isTracing = false;
         traceCurrentSeg = null;
