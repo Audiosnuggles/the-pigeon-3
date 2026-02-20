@@ -88,15 +88,16 @@ input[type="number"] { width: 50px; }
 
 
 /* =========================================
-   BULLETPROOF DOM CURSOR (VERSION 42)
+   BULLETPROOF DOM CURSOR (VERSION 43)
    ========================================= */
 
-/* 1. Versteckt den System-Pfeil rigoros mit einem unsichtbaren GIF */
-body.eraser-mode, body.eraser-mode * {
-  cursor: url('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='), none !important;
+/* Versteckt den System-Pfeil ganz simpel und ohne fehleranfällige Codes */
+body.eraser-mode, 
+body.eraser-mode * {
+  cursor: none !important;
 }
 
-/* 2. Unser neues Pinkes Radiergummi HTML-Element */
+/* Unser neues Pinkes Radiergummi HTML-Element */
 #custom-eraser {
   position: fixed;
   pointer-events: none; /* Sehr wichtig, damit wir "durch" das Bild aufs Canvas klicken können */
