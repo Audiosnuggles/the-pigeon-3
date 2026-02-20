@@ -85,34 +85,35 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // ==========================================
-  // --- UI & CURSOR LOGIC (BRUTE FORCE FIX) ---
+  // --- UI & CURSOR LOGIC (GLOBAL FIX) ---
   // ==========================================
-  const customEraser = document.getElementById("custom-eraser");
-  
-  // Wir erstellen dynamisch einen <style>-Tag, der den Browser zwingt, zu gehorchen
-  const cursorBlocker = document.createElement("style");
-  document.head.appendChild(cursorBlocker);
+  const globalCursorStyle = document.createElement("style");
+  document.head.appendChild(globalCursorStyle);
 
   toolSelect.addEventListener("change", (e) => {
-    const isErase = e.target.value === "erase";
-    if (isErase) {
-      // Schreibt knallhart "kein Cursor für ALLES" in die Seite
-      cursorBlocker.innerHTML = `* { cursor: none !important; }`;
-      customEraser.style.display = "block";
+    if (e.target.value === "erase") {
+      // Der *-Selektor zwingt JEDES Element (Canvas, Ränder, Lücken, Body) 
+      // dazu, den Radiergummi zu zeigen. Keine Lücken mehr!
+      globalCursorStyle.innerHTML = `
+        * { cursor: url('cursor.cur') 0 0, crosshair !important; }
+        html, body { cursor: url('cursor.cur') 0 0, crosshair !important; }
+      `;
     } else {
-      // Löscht den Befehl wieder, normales Fadenkreuz kommt zurück
-      cursorBlocker.innerHTML = ``;
-      customEraser.style.display = "none";
+      // Löscht die Zwangsregel wieder -> Canvas hat wieder normales Fadenkreuz
+      globalCursorStyle.innerHTML = ``;
     }
   });
 
-  window.addEventListener("mousemove", (e) => {
-    // Bewegt unser PNG exakt an die Mauskoordinaten
-    if (toolSelect.value === "erase" && customEraser) {
-      customEraser.style.left = e.clientX + "px";
-      customEraser.style.top = e.clientY + "px";
+  // Verhindert den "Maus-vergessen-beim-Ziehen"-Bug von Chrome
+  window.addEventListener("mousedown", () => {
+    if (toolSelect.value === "erase") {
+      document.body.style.cursor = "url('cursor.cur') 0 0, crosshair";
     }
   });
+  window.addEventListener("mouseup", () => {
+    document.body.style.cursor = "";
+  });
+  // ==========================================
   // ==========================================
 
   // --- INTERACTION MAIN CANVAS ---

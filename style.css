@@ -88,32 +88,14 @@ input[type="number"] { width: 50px; }
   #mobile-overlay { display: flex !important; transform: none !important; left: 0 !important; top: 0 !important; }
 }
 
-/* =========================================
-   STABILER DOM-CURSOR (THE INVISIBLE PIXEL TRICK)
-   ========================================= */
-
-/* Zwingt den Browser, ein unsichtbares 1x1 Pixel Bild als Cursor zu nutzen! */
-body.eraser-mode,
-body.eraser-mode * {
-  cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=') 0 0, none !important;
-}
-
-#custom-eraser {
-  position: fixed;
-  pointer-events: none; /* Klicks gehen durch das Bild hindurch */
-  z-index: 9999999;
-  width: 32px; 
-  height: 32px;
-  background-image: url('eraser.png'); /* HIER MUSS DEIN PNG SEIN! */
-  background-size: contain;
-  background-repeat: no-repeat;
-  display: none; 
-}
-
-body.eraser-mode #custom-eraser {
-  display: block; 
-}
-
 @keyframes tilt { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 @keyframes fastPulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+/* =========================================
+   DIAGNOSE TEST BLOCK (GANZ UNTEN)
+   ========================================= */
+body.eraser-mode, body.eraser-mode * {
+  /* Zwingt den Browser zu einem unzerstörbaren roten SVG-Quadrat */
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>') 0 24, crosshair !important;
+}
