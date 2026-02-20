@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final v45 (Native SVG Cursor - Brave Fix)
+ * THE PIGEON - Final v46 (DOM Eraser + Native Crosshair Peace Treaty)
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -25,7 +25,7 @@ function drawSegmentFractal(ctx, pts, idx1, idx2, size) { ctx.lineWidth = size; 
 
 document.addEventListener("DOMContentLoaded", function() {
   
-  console.log("🕊️ PIGEON V45: Native SVG Cursor geladen!");
+  console.log("🕊️ PIGEON V46: DOM Eraser + System Crosshair");
   
   let audioCtx, masterGain, analyser, isPlaying=false;
   let playbackStartTime=0, playbackDuration=0, animationFrameId;
@@ -89,15 +89,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   // ==========================================
-  // --- NATIVE CURSOR LOGIC ---
+  // --- DOM ERASER LOGIC ---
   // ==========================================
+  let isEraserMode = false;
+  const customEraser = document.getElementById("custom-eraser");
+
   toolSelect.addEventListener("change", (e) => {
-    if (e.target.value === "erase") {
-      document.documentElement.classList.add("eraser-mode");
+    isEraserMode = e.target.value === "erase";
+    if (isEraserMode) {
       document.body.classList.add("eraser-mode");
     } else {
-      document.documentElement.classList.remove("eraser-mode");
       document.body.classList.remove("eraser-mode");
+    }
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    // Bewegt das HTML Element immer mit der Maus mit.
+    // Da es ein DOM Element ist, zuckt oder verschwindet es beim Wischen nicht!
+    if (isEraserMode && customEraser) {
+      customEraser.style.left = e.clientX + "px";
+      customEraser.style.top = e.clientY + "px";
     }
   });
   // ==========================================
