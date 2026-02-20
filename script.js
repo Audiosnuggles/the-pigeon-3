@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final v40 (Unbreakable DOM Eraser)
+ * THE PIGEON - Final v42 (DOM Eraser + Console Debug Cache Fix)
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -24,6 +24,10 @@ function drawSegmentParticles(ctx, pts, idx1, idx2, size) { ctx.fillStyle = "rgb
 function drawSegmentFractal(ctx, pts, idx1, idx2, size) { ctx.lineWidth = size; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(pts[idx1].x + (pts[idx1].jX||0), pts[idx1].y + (pts[idx1].jY||0)); ctx.lineTo(pts[idx2].x + (pts[idx2].jX||0), pts[idx2].y + (pts[idx2].jY||0)); ctx.stroke(); }
 
 document.addEventListener("DOMContentLoaded", function() {
+  
+  // --- DEBUGGING ---
+  console.log("🕊️ PIGEON V42: Skript erfolgreich ohne Cache geladen!");
+  
   let audioCtx, masterGain, analyser, isPlaying=false;
   let playbackStartTime=0, playbackDuration=0, animationFrameId;
   let undoStack=[], liveNodes=[], liveGainNode=null, liveFilterNode=null;
@@ -90,12 +94,15 @@ document.addEventListener("DOMContentLoaded", function() {
   // ==========================================
   let isEraserMode = false;
   const customEraser = document.getElementById("custom-eraser");
+  
+  console.log("🕊️ PIGEON V42: Radierer HTML div gefunden?", !!customEraser);
 
   toolSelect.addEventListener("change", (e) => {
     isEraserMode = e.target.value === "erase";
+    console.log("🕊️ PIGEON V42: Tool geändert. Ist Radierer aktiv?", isEraserMode);
+    
     if (isEraserMode) {
       document.body.classList.add("eraser-mode");
-      // Sichert das Canvas nochmal hart gegen Chrome-Bugs ab
       tracks.forEach(t => t.canvas.style.setProperty("cursor", "none", "important"));
       const tp = document.getElementById("trace-pad");
       if (tp) tp.style.setProperty("cursor", "none", "important");
@@ -107,10 +114,17 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 
+  let logOnce = false; // Verhindert, dass die Konsole vollgespammt wird
   window.addEventListener("mousemove", (e) => {
     if (isEraserMode && customEraser) {
+      if (!logOnce) {
+        console.log("🕊️ PIGEON V42: Maus bewegt sich! Das Div sollte jetzt der Maus folgen.");
+        logOnce = true;
+      }
       customEraser.style.left = e.clientX + "px";
       customEraser.style.top = e.clientY + "px";
+    } else {
+      logOnce = false;
     }
   });
   // ==========================================
