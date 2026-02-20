@@ -93,9 +93,9 @@ input[type="number"] { width: 50px; }
 @keyframes fastPulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
 /* =========================================
-   DIAGNOSE TEST BLOCK (GANZ UNTEN)
+   ERASER CURSOR
    ========================================= */
-body.eraser-mode, body.eraser-mode * {
-  /* Zwingt den Browser zu einem unzerstörbaren roten SVG-Quadrat */
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="red"/></svg>') 0 24, crosshair !important;
+body.eraser-mode, 
+body.eraser-mode * {
+  cursor: url('cursor.cur') 0 0, crosshair !important;
 }

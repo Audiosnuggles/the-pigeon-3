@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final v36 (Invisible Pixel Trick + DOM Eraser)
+ * THE PIGEON - Final v38 (Clean Eraser Toggle)
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -85,35 +85,15 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // ==========================================
-  // --- UI & CURSOR LOGIC (GLOBAL FIX) ---
+  // --- UI & CURSOR LOGIC ---
   // ==========================================
-  const globalCursorStyle = document.createElement("style");
-  document.head.appendChild(globalCursorStyle);
-
   toolSelect.addEventListener("change", (e) => {
     if (e.target.value === "erase") {
-      // Der *-Selektor zwingt JEDES Element (Canvas, Ränder, Lücken, Body) 
-      // dazu, den Radiergummi zu zeigen. Keine Lücken mehr!
-      globalCursorStyle.innerHTML = `
-        * { cursor: url('cursor.cur') 0 0, crosshair !important; }
-        html, body { cursor: url('cursor.cur') 0 0, crosshair !important; }
-      `;
+      document.body.classList.add("eraser-mode");
     } else {
-      // Löscht die Zwangsregel wieder -> Canvas hat wieder normales Fadenkreuz
-      globalCursorStyle.innerHTML = ``;
+      document.body.classList.remove("eraser-mode");
     }
   });
-
-  // Verhindert den "Maus-vergessen-beim-Ziehen"-Bug von Chrome
-  window.addEventListener("mousedown", () => {
-    if (toolSelect.value === "erase") {
-      document.body.style.cursor = "url('cursor.cur') 0 0, crosshair";
-    }
-  });
-  window.addEventListener("mouseup", () => {
-    document.body.style.cursor = "";
-  });
-  // ==========================================
   // ==========================================
 
   // --- INTERACTION MAIN CANVAS ---
