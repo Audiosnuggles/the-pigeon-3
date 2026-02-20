@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final v39 (Fixed .cur Coordinate Bug!)
+ * THE PIGEON - Final v40 (Unbreakable DOM Eraser)
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -84,25 +84,37 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("scaleSelectContainer").style.display = harmonizeCheckbox.checked ? "inline" : "none";
   });
 
-  // ==========================================
-  // --- UI & CURSOR LOGIC ---
-  // ==========================================
-  function updateCursor() {
-    const isErase = toolSelect.value === "erase";
-    // WICHTIG: Keine "0 0" Koordinaten bei .cur Dateien! Browser lehnen das als invalid ab!
-    const cursorValue = isErase ? "url('cursor.cur'), crosshair" : "crosshair";
-    
-    // Wir setzen den Cursor gnadenlos inline auf alles Wichtige
-    document.body.style.cursor = isErase ? "url('cursor.cur'), auto" : "auto";
-    tracks.forEach(t => t.canvas.style.cursor = cursorValue);
-    const tracePad = document.getElementById("trace-pad");
-    if (tracePad) tracePad.style.cursor = cursorValue;
-  }
 
-  toolSelect.addEventListener("change", updateCursor);
-  // Führen wir beim Start einmal aus, damit der Standard (Crosshair) gesetzt wird
-  updateCursor(); 
   // ==========================================
+  // --- BULLETPROOF CURSOR LOGIC ---
+  // ==========================================
+  let isEraserMode = false;
+  const customEraser = document.getElementById("custom-eraser");
+
+  toolSelect.addEventListener("change", (e) => {
+    isEraserMode = e.target.value === "erase";
+    if (isEraserMode) {
+      document.body.classList.add("eraser-mode");
+      // Sichert das Canvas nochmal hart gegen Chrome-Bugs ab
+      tracks.forEach(t => t.canvas.style.setProperty("cursor", "none", "important"));
+      const tp = document.getElementById("trace-pad");
+      if (tp) tp.style.setProperty("cursor", "none", "important");
+    } else {
+      document.body.classList.remove("eraser-mode");
+      tracks.forEach(t => t.canvas.style.setProperty("cursor", "crosshair", "important"));
+      const tp = document.getElementById("trace-pad");
+      if (tp) tp.style.setProperty("cursor", "crosshair", "important");
+    }
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (isEraserMode && customEraser) {
+      customEraser.style.left = e.clientX + "px";
+      customEraser.style.top = e.clientY + "px";
+    }
+  });
+  // ==========================================
+
 
   // --- INTERACTION MAIN CANVAS ---
   tracks.forEach(track => {
