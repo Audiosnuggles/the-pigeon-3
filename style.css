@@ -21,7 +21,7 @@ canvas { border: 1px solid #ccc; background-color: #fff; cursor: crosshair; disp
 .snap-label { font-size: 11px; margin-top: 5px; }
 
 /* --- TRACE MODULE --- */
-#trace-module { display: flex; gap: 25px; background: #fff; padding: 15px; border-radius: 2px; margin-bottom: 20px; border: 1px solid #bbb; align-items: center; }
+#trace-module { display: flex; gap: 25px; background: #fff; padding: 15px; border-radius: 2px; margin-bottom: 20px; border: 1px solid #e2e2e2; align-items: center; }
 .trace-sidebar { display: flex; flex-direction: column; gap: 8px; width: 110px; }
 .trace-sidebar .label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; }
 .track-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
@@ -31,7 +31,7 @@ canvas { border: 1px solid #ccc; background-color: #fff; cursor: crosshair; disp
 
 /* Quadratisches Pad */
 #trace-pad { 
-  width: 150px; height: 150px; background: #6b7a80; border: 2px solid #bbb; border-radius: 8px; 
+  width: 150px; height: 150px; background: #f5f5f5; border: 1px solid #bbb; border-radius: 8px; 
   position: relative; overflow: hidden; cursor: crosshair; display: flex; align-items: center; 
   justify-content: center; touch-action: none; text-align: center;
   box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
