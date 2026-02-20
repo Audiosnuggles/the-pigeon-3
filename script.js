@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final Root Level Fix
+ * THE PIGEON - Final v45 (Native SVG Cursor - Brave Fix)
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -24,6 +24,9 @@ function drawSegmentParticles(ctx, pts, idx1, idx2, size) { ctx.fillStyle = "rgb
 function drawSegmentFractal(ctx, pts, idx1, idx2, size) { ctx.lineWidth = size; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(pts[idx1].x + (pts[idx1].jX||0), pts[idx1].y + (pts[idx1].jY||0)); ctx.lineTo(pts[idx2].x + (pts[idx2].jX||0), pts[idx2].y + (pts[idx2].jY||0)); ctx.stroke(); }
 
 document.addEventListener("DOMContentLoaded", function() {
+  
+  console.log("🕊️ PIGEON V45: Native SVG Cursor geladen!");
+  
   let audioCtx, masterGain, analyser, isPlaying=false;
   let playbackStartTime=0, playbackDuration=0, animationFrameId;
   let undoStack=[], liveNodes=[], liveGainNode=null, liveFilterNode=null;
@@ -86,35 +89,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   // ==========================================
-  // --- BULLETPROOF CURSOR LOGIC ---
+  // --- NATIVE CURSOR LOGIC ---
   // ==========================================
-  let isEraserMode = false;
-  const customEraser = document.getElementById("custom-eraser");
-
   toolSelect.addEventListener("change", (e) => {
-    isEraserMode = e.target.value === "erase";
-    if (isEraserMode) {
+    if (e.target.value === "erase") {
       document.documentElement.classList.add("eraser-mode");
       document.body.classList.add("eraser-mode");
-      
-      // Inline overrides für die Canvas Felder
-      tracks.forEach(t => t.canvas.style.cursor = "none");
-      const tp = document.getElementById("trace-pad");
-      if (tp) tp.style.cursor = "none";
     } else {
       document.documentElement.classList.remove("eraser-mode");
       document.body.classList.remove("eraser-mode");
-      
-      tracks.forEach(t => t.canvas.style.cursor = "crosshair");
-      const tp = document.getElementById("trace-pad");
-      if (tp) tp.style.cursor = "crosshair";
-    }
-  });
-
-  window.addEventListener("mousemove", (e) => {
-    if (isEraserMode && customEraser) {
-      customEraser.style.left = e.clientX + "px";
-      customEraser.style.top = e.clientY + "px";
     }
   });
   // ==========================================
