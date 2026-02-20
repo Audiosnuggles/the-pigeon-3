@@ -1,5 +1,5 @@
 /**
- * THE PIGEON - Final v42 (DOM Eraser + Console Debug Cache Fix)
+ * THE PIGEON - Final Root Level Fix
  */
 
 let patternBanks = { A: [null, null, null, null], B: [null, null, null, null], C: [null, null, null, null] };
@@ -24,10 +24,6 @@ function drawSegmentParticles(ctx, pts, idx1, idx2, size) { ctx.fillStyle = "rgb
 function drawSegmentFractal(ctx, pts, idx1, idx2, size) { ctx.lineWidth = size; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(pts[idx1].x + (pts[idx1].jX||0), pts[idx1].y + (pts[idx1].jY||0)); ctx.lineTo(pts[idx2].x + (pts[idx2].jX||0), pts[idx2].y + (pts[idx2].jY||0)); ctx.stroke(); }
 
 document.addEventListener("DOMContentLoaded", function() {
-  
-  // --- DEBUGGING ---
-  console.log("🕊️ PIGEON V42: Skript erfolgreich ohne Cache geladen!");
-  
   let audioCtx, masterGain, analyser, isPlaying=false;
   let playbackStartTime=0, playbackDuration=0, animationFrameId;
   let undoStack=[], liveNodes=[], liveGainNode=null, liveFilterNode=null;
@@ -94,37 +90,31 @@ document.addEventListener("DOMContentLoaded", function() {
   // ==========================================
   let isEraserMode = false;
   const customEraser = document.getElementById("custom-eraser");
-  
-  console.log("🕊️ PIGEON V42: Radierer HTML div gefunden?", !!customEraser);
 
   toolSelect.addEventListener("change", (e) => {
     isEraserMode = e.target.value === "erase";
-    console.log("🕊️ PIGEON V42: Tool geändert. Ist Radierer aktiv?", isEraserMode);
-    
     if (isEraserMode) {
+      document.documentElement.classList.add("eraser-mode");
       document.body.classList.add("eraser-mode");
-      tracks.forEach(t => t.canvas.style.setProperty("cursor", "none", "important"));
+      
+      // Inline overrides für die Canvas Felder
+      tracks.forEach(t => t.canvas.style.cursor = "none");
       const tp = document.getElementById("trace-pad");
-      if (tp) tp.style.setProperty("cursor", "none", "important");
+      if (tp) tp.style.cursor = "none";
     } else {
+      document.documentElement.classList.remove("eraser-mode");
       document.body.classList.remove("eraser-mode");
-      tracks.forEach(t => t.canvas.style.setProperty("cursor", "crosshair", "important"));
+      
+      tracks.forEach(t => t.canvas.style.cursor = "crosshair");
       const tp = document.getElementById("trace-pad");
-      if (tp) tp.style.setProperty("cursor", "crosshair", "important");
+      if (tp) tp.style.cursor = "crosshair";
     }
   });
 
-  let logOnce = false; // Verhindert, dass die Konsole vollgespammt wird
   window.addEventListener("mousemove", (e) => {
     if (isEraserMode && customEraser) {
-      if (!logOnce) {
-        console.log("🕊️ PIGEON V42: Maus bewegt sich! Das Div sollte jetzt der Maus folgen.");
-        logOnce = true;
-      }
       customEraser.style.left = e.clientX + "px";
       customEraser.style.top = e.clientY + "px";
-    } else {
-      logOnce = false;
     }
   });
   // ==========================================

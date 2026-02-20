@@ -88,19 +88,19 @@ input[type="number"] { width: 50px; }
 
 
 /* =========================================
-   BULLETPROOF DOM CURSOR (VERSION 43)
+   BULLETPROOF DOM CURSOR (ROOT LEVEL)
    ========================================= */
 
-/* Versteckt den System-Pfeil ganz simpel und ohne fehleranfällige Codes */
-body.eraser-mode, 
-body.eraser-mode * {
+/* Der Trick: Wir verstecken die Maus nicht nur auf dem Body, sondern auch auf dem HTML-Root! */
+html.eraser-mode,
+html.eraser-mode body,
+html.eraser-mode * {
   cursor: none !important;
 }
 
-/* Unser neues Pinkes Radiergummi HTML-Element */
 #custom-eraser {
   position: fixed;
-  pointer-events: none; /* Sehr wichtig, damit wir "durch" das Bild aufs Canvas klicken können */
+  pointer-events: none; /* Klicks gehen durch das Bild hindurch aufs Canvas! */
   z-index: 9999999;
   width: 32px; 
   height: 32px;
@@ -111,6 +111,6 @@ body.eraser-mode * {
   transform: translate(-10%, -90%);
 }
 
-body.eraser-mode #custom-eraser {
+html.eraser-mode #custom-eraser {
   display: block; 
 }
